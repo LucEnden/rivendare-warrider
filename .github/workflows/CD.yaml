@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+        type: string
+        default: ''
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build in Release mode
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: rivendare-warrider-tracker
+        path: obj\Release\rivendare-warrider-tracker.dll
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: obj\Release\rivendare-warrider-tracker.dll
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
