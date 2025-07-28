@@ -1,9 +1,7 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-and-release:
@@ -12,6 +10,15 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get latest tag
+      id: get_tag
+      run: |
+        $latestTag = git describe --tags --abbrev=0
+        echo "tag=$latestTag" >> $env:GITHUB_OUTPUT
+        echo "Latest tag: $latestTag"
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
@@ -34,6 +41,8 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ steps.get_tag.outputs.tag }}
+        name: Release ${{ steps.get_tag.outputs.tag }}
         files: bin\Release\rivendare-warrider-tracker.dll
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
