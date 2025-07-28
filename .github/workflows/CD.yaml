@@ -17,26 +17,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
 
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore RivendareWarriderTracker.sln
 
     - name: Build in Release mode
-      run: dotnet build --configuration Release --no-restore
+      run: msbuild RivendareWarriderTracker.sln /p:Configuration=Release /p:Platform="Any CPU"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: rivendare-warrider-tracker
-        path: obj\Release\rivendare-warrider-tracker.dll
+        path: bin\Release\rivendare-warrider-tracker.dll
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        files: obj\Release\rivendare-warrider-tracker.dll
+        files: bin\Release\rivendare-warrider-tracker.dll
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
