@@ -32,6 +32,22 @@ jobs:
     - name: Build in Release mode
       run: msbuild RivendareWarriderTracker.sln /p:Configuration=Release /p:Platform="Any CPU"
 
+    - name: Verify build output
+      run: |
+        if (Test-Path "bin\Release\rivendare-warrider-tracker.dll") {
+          Write-Host "✅ DLL found: bin\Release\rivendare-warrider-tracker.dll"
+          Get-Item "bin\Release\rivendare-warrider-tracker.dll" | Select-Object Name, Length, LastWriteTime
+        } else {
+          Write-Host "❌ DLL not found in bin\Release\"
+          Write-Host "Contents of bin\Release:"
+          if (Test-Path "bin\Release") {
+            Get-ChildItem "bin\Release" | Select-Object Name, Length
+          } else {
+            Write-Host "bin\Release directory does not exist"
+          }
+          exit 1
+        }
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
@@ -44,5 +60,9 @@ jobs:
         tag_name: ${{ steps.get_tag.outputs.tag }}
         name: Release ${{ steps.get_tag.outputs.tag }}
         files: bin\Release\rivendare-warrider-tracker.dll
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        make_latest: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
