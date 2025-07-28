@@ -1,13 +1,9 @@
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release'
-        required: true
-        type: string
-        default: ''
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build-and-release:
